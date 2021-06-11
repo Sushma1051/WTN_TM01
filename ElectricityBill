@@ -1,0 +1,292 @@
+Commerical.java
+
+
+
+/*package com.wipro.eb.entity;
+
+public class Commercial extends Connection{
+
+	public Commercial(int currentReading, int previousReading, float[] slabs){
+		super(currentReading, currentReading, slabs);
+		}
+
+	
+public float computeBill() {
+		int units = currentReading - previousReading;
+		float bill =0;
+		float tb=0;
+		if(units<=50)
+			bill=slabs[0]*units;
+		else if(units<=100)
+			bill=slabs[0]*50 + slabs[1]*(units-50);
+		else
+			bill = slabs[0]*50 + slabs[1]*50 + slabs[2]*(units-100);
+	
+		if(bill>=10000) 
+			tb = (float) (bill * 0.09);
+		
+			else if(bill>=5000)
+				tb = (float) (bill*0.06);
+			else 
+				tb = (float) (bill*0.02);
+		return tb;	
+		}
+	}
+
+*/
+
+
+package com.wipro.eb.entity;
+
+ 
+
+public  class Commercial extends Connection {
+    public Commercial(int currentReading, int previousReading, float[] slabs) {
+        super(currentReading, previousReading, slabs);
+        // TODO Auto-generated constructor stub
+    }
+
+ 
+
+    /*public Commercial() {
+        super(getPreviousReading(),getCurrentReading(),slabs);
+        
+        // TODO Auto-generated constructor stub
+    }*/
+
+ 
+
+    @Override
+    public float computeBill() {
+        // TODO Auto-generated method stub
+    	int units = currentReading - previousReading;
+        float bill=0;
+        float tb =0;
+        //Compute the bill based on slabs
+        if(units<=50) {
+            bill=units*slabs[0];
+        }
+        else if(units>50) {
+            bill=50*slabs[0]+(units-50)*slabs[1];
+        }
+        else {
+            bill=50*slabs[0]+50*slabs[1]+(units-100)*slabs[2];
+        }
+        //Compute the duty charge for Commercial Connection
+        
+        if(bill>=10000) {
+            tb = (float) (bill*0.09);
+        }
+        else if(bill>=5000) {
+            tb = (float) (bill * 0.06);
+        }
+        else  {
+            tb = (float) (bill*0.02);
+        }
+        
+        return tb;
+    }
+    }
+    
+    
+    Connection.java
+    
+    package com.wipro.eb.entity;
+
+public abstract class Connection {
+
+	int previousReading;
+	int currentReading;
+	float[] slabs;
+	public Connection(int previousReading, int currentReading, float[] slabs) {
+		super();
+		this.previousReading = previousReading;
+		this.currentReading = currentReading;
+		this.slabs = slabs;
+	}
+	
+	public abstract float computeBill();
+
+	public int getPreviousReading() {
+		return previousReading;
+	}
+
+	public void setPreviousReading(int previousReading) {
+		this.previousReading = previousReading;
+	}
+
+	public int getCurrentReading() {
+		return currentReading;
+	}
+
+	public void setCurrentReading(int currentReading) {
+		this.currentReading = currentReading;
+	}
+
+	public float[] getSlabs() {
+		return slabs;
+	}
+
+	public void setSlabs(float[] slabs) {
+		this.slabs = slabs;
+	}
+	
+}
+
+
+Domestic.java
+
+package com.wipro.eb.entity;
+
+
+public class Domestic extends Connection{
+
+	public Domestic(int currentReading, int previousReading, float[] slabs){
+	super(currentReading, currentReading, slabs);
+	}
+
+	@Override
+	public float computeBill() {
+		int units = currentReading - previousReading;
+		float bill =0;
+		if(units<=50)
+			bill=slabs[0]*units;
+		        else if(units>50 && units<=100) 
+			bill=slabs[0]50 + slabs[1](units-50);
+		else
+			bill = slabs[0]50 + slabs[1]*50 + slabs[2](units-100);
+	
+	return bill;
+	}
+	
+}
+
+Invalid ConnectionException
+
+package com.wipro.eb.exception;
+
+public class InvalidConnectionException extends Exception{
+
+	public String toString() {
+		return "Invalid ConnectionType";
+	}
+}
+
+
+InvalidReadingException
+
+package com.wipro.eb.exception;
+
+public class InvalidReadingException extends Exception{
+
+	public String toString() {
+		return "Incorrect Reading";
+	}
+	
+	
+}
+
+EBMain.java
+
+package com.wipro.eb.main;
+import com.wipro.eb.*;
+import com.wipro.eb.service.ConnectionService;
+
+import java.util.*;
+public class EBMain {
+
+	public static void main(String[] args) {
+		 System.out.println (new ConnectionService().generateBill(-130,100,"Commercial"));
+         System.out.println (new ConnectionService().generateBill(130,-100,"Commercial"));
+         System.out.println (new ConnectionService().generateBill(30,100,"Commercial"));
+         
+         System.out.println (new ConnectionService().generateBill(130,100,"commercial"));
+         System.out.println (new ConnectionService().generateBill(130,100,"mytype"));
+         System.out.println (new ConnectionService().generateBill(130,100,""));
+         
+         System.out.println (new ConnectionService().generateBill(130,100,"Domestic"));
+         System.out.println (new ConnectionService().generateBill(180,100,"Domestic"));
+         System.out.println (new ConnectionService().generateBill(230,100,"Domestic"));
+         
+         System.out.println (new ConnectionService().generateBill(130,100,"Commercial"));
+         System.out.println (new ConnectionService().generateBill(180,100,"Commercial"));
+         System.out.println (new ConnectionService().generateBill(230,100,"Commercial"));
+
+	}
+
+}
+
+
+
+Connection Service.java
+
+package com.wipro.eb.service;
+
+ 
+
+
+import com.wipro.eb.entity.*;
+
+import com.wipro.eb.exception.InvalidConnectionException;
+import com.wipro.eb.exception.InvalidReadingException;
+
+ 
+
+public class ConnectionService {
+    public boolean validate(int currentReading,int previousReading,String type)throws InvalidReadingException,InvalidConnectionException {
+        
+        if((currentReading<previousReading)
+                ||(currentReading<0)
+                ||(previousReading<0)) {
+            throw new InvalidReadingException();
+        }
+        
+        //else if(!type.equals("Domestic")&&!type.equals("Commercial"))
+        else if( !(type.equals("Domestic")
+                ||type.equals("Commercial") )){
+            throw new InvalidConnectionException();
+            }
+        else {
+            return true;
+        }
+    }
+       
+    public float calculateBillAmt(int currentReading,int previousReading,String type) {
+        try {
+            //Call the validate method to check inputs
+            validate(currentReading,previousReading,type);
+            float[] slabs;
+            Connection conn;
+            //Invoke appropriate Connection type object
+            if(type.equals("Domestic")) {
+                slabs= new float[]{2.3f,4.2f,5.5f};
+                conn=new Domestic(currentReading,previousReading,slabs);
+            }
+            else {
+                slabs= new float[]{5.2f,6.8f,8.3f};
+                conn=new Commercial(currentReading, previousReading, slabs);
+            }
+            //Calculate the bill and return the value
+            float bill=conn.computeBill();
+            return bill;
+        }
+        catch (InvalidReadingException e) {
+            return -1;
+        }
+        catch (InvalidConnectionException e) {
+            return -2;
+        }
+        }
+    public String generateBill(int currentReading,int previousReading,String type) {
+        float amount=calculateBillAmt(currentReading,previousReading,type);
+        if(amount==-1) {
+            return "Incorrect Reading";
+        }
+        else if(amount==-2) {
+            return "Invalid ConnectionType";
+        }
+        else {
+            return "Amount to be paid:"+amount;
+        }
+    }
+}
